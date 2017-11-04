@@ -1,29 +1,65 @@
-/*
- Copyright 2017 Keith Peters
-
- Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
- rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
- persons to whom the Software is furnished to do so, subject to the following conditions:
-
- The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
- Software.
-
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
- WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
-
-var context = bitlib.context(600, 600),
-    width = context.width,
-    height = context.height;
+init = e => {
+    boxW = 50;
+    boxH = 50;
+    t = 0;
+    last = 0;
     
-    context.fillStyle = 'red';
-    context.beginPath();
-    context.arc(200,200, 20, 0, Math.PI*2);
-    context.closePath();
-    context.fill();
-    console.log('I ran once');
+    loop();
+}
+function step(dt){
+    boxW = 50 + Math.sin(t/20)*30;
+}
+
+function draw(dt){
+    clear(30);
+    renderColorNumbers();
+    fillRect(WIDTH/2-boxW/2,HEIGHT/2-25, boxW,50, Math.floor(t/20)%64);
+}
+
+loop = e => {
+  //stats.begin();
+
+    pal = palDefault;
+    
+    //game timer
+    let now = new Date().getTime();
+    dt = Math.min(1, (now - last) / 1000);
+    t += dt;
+    
+    step(dt);
+    draw(dt);
+    
+
+  render(e);
+  
+
+  //stats.end();
+  requestAnimationFrame(loop);
+}
+
+function renderColorNumbers(){
+
+  for(var i = 0; i < 64; i++){
+    text([
+      i.toString(),
+      i%16 * 16,
+      Math.floor(i/16) * 16,
+      1,
+      2,
+      'left',
+      'top',
+      1,
+      i,
+    ])
+  }
+}
+
+init();
+
+
+
+
+
+
 
 
