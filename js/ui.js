@@ -2,8 +2,9 @@ var panel;
 
 function setup(yymmdd, prev, next, desc, issueNumber, links) {
     document.title = yymmdd;
+    QuickSettings.useExtStyleSheet();
     panel= QuickSettings.create(10, 10, yymmdd)
-        .addHTML("home", '<a href="https://bit101.github.io/lab/">CALENDAR</a> - <a href="https://bit101.github.io/lab/thumbs.html">THUMBS</a>');
+        .addHTML("home", '<a href="http://code.ryanmalm.com/lab/">CALENDAR</a> - <a href="http://code.ryanmalm.com/lab/thumbs.html">THUMBS</a>');
 
     var prevNext = '';
     if(prev) {

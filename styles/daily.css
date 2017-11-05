@@ -13,8 +13,8 @@ canvas {
   left: 50%;
   right: 0;
 
-  width: 80vmax;
-  height: 50vmax;
+  width: 75vmax;
+  height: 47vmax;
 
   transform:translate(-50%, -25%);
   image-rendering: optimizeSpeed;
@@ -29,5 +29,5 @@ canvas {
 }
 
 a:link, a:visited, a:active, a:hover {
-    color: #000000;
+    color: #bbbbbb;
 }
