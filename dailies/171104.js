@@ -6,7 +6,11 @@ init = e => {
 
     panel
     .addRange("numbers X", 0, 200, 0, 1)
-    .addRange("numbers Y", 0, 200, 0, 1);
+    .addRange("numbers Y", 0, 200, 0, 1)
+    .addRange("spacing X", 16, 50, 16, 1)
+    .addRange("spacing Y", 16, 50, 16, 1)
+    .addRange("box X", 25, 400, WIDTH/2, 1)
+    .addRange("box Y", 25, 200, HEIGHT/2, 1);
 
 
 
@@ -24,7 +28,10 @@ function step(dt){
 function draw(dt){
     clear(30);
     renderColorNumbers();
-    fillRect(WIDTH/2-boxW/2,HEIGHT/2-25, boxW,50, Math.floor(t/20)%64);
+
+    boxX = panel.getValue("box X");
+    boxY = panel.getValue("box Y");
+    fillRect(boxX-boxW/2,boxY-25, boxW,50, Math.floor(t/20)%64);
 }
 
 loop = dt => {
@@ -52,12 +59,15 @@ function renderColorNumbers(){
 
   numX = panel.getValue("numbers X");
   numY = panel.getValue("numbers Y");
+  spcX = panel.getValue("spacing X");
+  spcY = panel.getValue("spacing Y");
+
 
   for(var i = 0; i < 64; i++){
     text([
       i.toString(),
-      numX + (i%16 * 16),
-      numY + (Math.floor(i/16) * 16),
+      numX + (i%16 * spcX),
+      numY + (Math.floor(i/16) * spcY),
       1,
       2,
       'left',
