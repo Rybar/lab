@@ -2,7 +2,7 @@
 
 const WIDTH =     427;
 const HEIGHT =    256;
-const PAGES =     3;  //page = 1 screen HEIGHTxWIDTH worth of screenbuffer.
+const PAGES =     10;  //page = 1 screen HEIGHTxWIDTH worth of screenbuffer.
 const PAGESIZE = WIDTH*HEIGHT;
 
 const SCREEN = 0;
@@ -39,74 +39,74 @@ colors =
 0xff131014,
 0xff25173B,
 0xff2D1773,
-0xff2A20B4, 
-0xff233EDF, 
-0xff0A6AFA, 
+0xff2A20B4,
+0xff233EDF,
+0xff0A6AFA,
 0xff1BA3F9,
 0xff41D5FF,
-0xff40FCFF, 
-0xff64F2D6, 
-0xff43DB9C, 
+0xff40FCFF,
+0xff64F2D6,
+0xff43DB9C,
 0xff35C159,
-0xff2EA014, 
+0xff2EA014,
 0xff3E7A1A,
 0xff3B5224,
 
 0xff202012,
-0xff643414, 
-0xffC45C28, 
-0xffDE9F24, 
-0xffC7D620, 
-0xffDBFCA6, 
-0xffFFFFFF, 
-0xffC0F3FE, 
+0xff643414,
+0xffC45C28,
+0xffDE9F24,
+0xffC7D620,
+0xffDBFCA6,
+0xffFFFFFF,
+0xffC0F3FE,
 0xffB8D6FA,
 0xff97A0F5,
 0xff736AE8,
-0xff9B4ABC, 
-0xff803A79, 
+0xff9B4ABC,
+0xff803A79,
 0xff533340,
-0xff342224, 
-0xff1A1C22, 
+0xff342224,
+0xff1A1C22,
 
-0xff282b32, 
-0xff3b4171, 
-0xff4775bb, 
-0xff63a4db, 
-0xff9cd2f4, 
-0xffeae0da, 
-0xffd1b9b3, 
-0xffaf938b, 
-0xff8d756d, 
-0xff62544a, 
-0xff413933, 
-0xff332442, 
-0xff38315b, 
-0xff52528e, 
-0xff6a75ba, 
-0xffa3b5e9, 
+0xff282b32,
+0xff3b4171,
+0xff4775bb,
+0xff63a4db,
+0xff9cd2f4,
+0xffeae0da,
+0xffd1b9b3,
+0xffaf938b,
+0xff8d756d,
+0xff62544a,
+0xff413933,
+0xff332442,
+0xff38315b,
+0xff52528e,
+0xff6a75ba,
+0xffa3b5e9,
 
-0xffffe6e3, 
-0xfffbbfb9, 
-0xffe49b84, 
-0xffbe8d58, 
-0xff857d47, 
-0xff4e6723, 
+0xffffe6e3,
+0xfffbbfb9,
+0xffe49b84,
+0xffbe8d58,
+0xff857d47,
+0xff4e6723,
 0xff648432,
 0xff8daf5d,
-0xffbadc92, 
-0xffe2f7cd, 
-0xffaad2e4, 
-0xff8bb0c7, 
-0xff6286a0, 
-0xff556779, 
+0xffbadc92,
+0xffe2f7cd,
+0xffaad2e4,
+0xff8bb0c7,
+0xff6286a0,
+0xff556779,
 0xff444e5a,
 0xff343942,]
 
 //active palette index. maps to indices in colors[]. can alter this whenever for palette effects.
 pal =            [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,
                   32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63];
-                  
+
 //paldrk =          [0,0,1,2,3,4,5,6,6,10,11,12,13,14,2,2,15,16,17,18,22,20,23,24,25,26,2,2,27,28,31,13]
 
 ctx.imageSmoothingEnabled = false;
@@ -127,8 +127,8 @@ ram =             new Uint8ClampedArray(WIDTH * HEIGHT * PAGES);
   }
 
   function pset(x, y, color) { //an index from colors[], 0-63
-    x = (x|0).clamp(0,WIDTH-1);
-    y = (y|0).clamp(0,HEIGHT-1);
+    x = x|0;
+    y = y|0;
     color = color|0;
 
     ram[renderTarget + y * WIDTH + x] = color;

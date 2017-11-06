@@ -1,4 +1,4 @@
-init = e => {
+function init(){
     boxW = 50;
     boxH = 50;
     t = 0;
@@ -34,7 +34,7 @@ function draw(dt){
     fillRect(boxX-boxW/2,boxY-25, boxW,50, Math.floor(t/20)%64);
 }
 
-loop = dt => {
+function loop(){
   //stats.begin();
 
     pal = palDefault;
