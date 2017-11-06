@@ -1,6 +1,6 @@
 html, body {
     color: black;
-    background-color: #333333;
+    background-color: #403353;
     font: 14px Arial;
     margin: 0;
     padding: 0;
@@ -8,6 +8,10 @@ html, body {
 
 h3 {
     margin-bottom: 0;
+}
+
+h1 {
+  font-family: 'Press Start 2P', cursive;
 }
 
 hr {
