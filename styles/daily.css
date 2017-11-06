@@ -28,6 +28,7 @@ canvas {
 
 }
 
-a:link, a:visited, a:active, a:hover {
+a, a:link, a:visited, a:active, a:hover {
     color: #bbbbbb;
+    text-decoration: none;
 }
