@@ -127,8 +127,8 @@ ram =             new Uint8ClampedArray(WIDTH * HEIGHT * PAGES);
   }
 
   function pset(x, y, color) { //an index from colors[], 0-63
-    x = x|0;
-    y = y|0;
+    x = x.clamp(1, WIDTH)|0;
+    y = y.clamp(1,HEIGHT)|0;
     color = color|0;
 
     ram[renderTarget + y * WIDTH + x] = color;
