@@ -14,6 +14,8 @@
 - procedural explosions
 - WFC algorithm
 - auto-tile
+- dynamic lighting
+- 
 
 
 ### engine features
@@ -23,6 +25,10 @@
 - scrolling camera renderer
 - dumb flood fill
 - filled n-gons
+- better tri fill
+- backface culling
+- dithering
+- read in image to color indexed buffer, -sprites, etc.
 
 ### music / synth
 

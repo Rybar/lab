@@ -7,6 +7,7 @@ const PAGESIZE = WIDTH*HEIGHT;
 
 const SCREEN = 0;
 const BUFFER = PAGESIZE;
+const SPRITES = PAGESIZE*4;
 
 fontString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_!@#.'\"?/<()";
 
@@ -118,7 +119,7 @@ var imageData =   ctx.getImageData(0, 0, WIDTH, HEIGHT),
 buf =             new ArrayBuffer(imageData.data.length),
 buf8 =            new Uint8Array(buf),
 data =            new Uint32Array(buf),
-ram =             new Uint8ClampedArray(WIDTH * HEIGHT * PAGES);
+ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
 
 //--------------graphics functions----------------
 
@@ -544,6 +545,29 @@ ram =             new Uint8ClampedArray(WIDTH * HEIGHT * PAGES);
     source.start();
     return {volume: gainNode, sound: source};
 }
+
+  function imageToRam(image, address) {
+  		  
+         //var image = E.smallcanvas.toDataURL("image/png");	
+          let tempCanvas = document.createElement('canvas');
+         tempCanvas.width = WIDTH;
+         tempCanvas.height = HEIGHT;
+         let context = tempCanvas.getContext('2d');
+         //draw image to canvas
+         context.drawImage(image, 0, 0);
+ 
+         //get image data
+         var imageData = context.getImageData(0,0, 256, 256);
+ 
+         //set up 32bit view of buffer
+         let data = new Uint32Array(imageData.data.buffer);
+ 
+         //compare buffer to palette (loop)
+         for(var i = 0; i < data.length; i++) {
+ 
+             ram[address + i] = colors.indexOf(data[i]);
+         }
+  }
 
 function render() {
 
