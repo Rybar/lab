@@ -3,14 +3,21 @@ function init() {
     boxH = 50;
     t = 0;
     last = 0;
+    increment = 60;
+    timer = 60;
+
+    colorRamp = [3,4,5,6,7,8,9,10,11,12,20,19,18,28,27]
 
     panel
-    .addRange("camera X", -10, 10, -10, 0.01)
-    .addRange("camera Y", -10, 10, 10, 0.01)
+    .addRange("camera X", -30, 30, 2.7, 0.01)
+    .addRange("camera Y", -30, 30, 8.5, 0.01)
     .addRange("camera Z", -15, -1, -1, 0.05)
-    .addRange("pitch", -1, 1, -0.405, 0.001)
-    .addRange("yaw", -1, 1, 0.189, 0.001)
-    .addRange("roll", -1, 1, -1, 0.001);
+    .addRange("pitch", -1, 1, 0, 0.001)
+    .addRange("yaw", -1, 1, 0, 0.001)
+    .addRange("color speed", 0, 60, 40, 0.5)
+    .addRange("roll speed", -.1, .1, 0.01, 0.0001)
+    .addRange("speed", -1, 1, 0.51, 0.01);
+    //
 
     vars = {};
     vars.frameNo=0;
@@ -25,11 +32,12 @@ function init() {
         vars.scale=256;
 
     vars.shapes=[];
-    for(let i = 0; i < 100; i++){
+    for(let i = 0; i < 200; i++){
+      a = Math.random()*360;
       vars.shapes[i] = loadCube(
-        Math.random()*20-10,
-        Math.random()*20-10,
-        Math.random()*200,
+        Math.sin(a)*12,
+        Math.cos(a)*12,
+        Math.random()*300,
       )
     }
 
@@ -56,7 +64,7 @@ function loadCube(x,y,z){
     shape.segs.push(new Seg(1,-1,-1,1,-1,1));
     shape.segs.push(new Seg(1,1,-1,1,1,1));
     shape.segs.push(new Seg(-1,1,-1,-1,1,1));
-    shape.color = Math.floor(Math.random()*64);
+    shape.color = Math.floor(Math.random()*3);
     return shape;
 }
 
@@ -179,13 +187,22 @@ function step(dt){
     vars.camZ = panel.getValue('camera Z');
     vars.pitch = panel.getValue('pitch');
     vars.yaw = panel.getValue('yaw');
-    vars.roll = panel.getValue('roll');
+    var colorSpeed = panel.getValue('color speed');
+    var rollSpeed = panel.getValue('roll speed');
+    var speed = panel.getValue('speed');
+    //vars.roll = panel.getValue('roll');
 
-    //vars.roll += .02;
+    vars.roll += rollSpeed;
 
 vars.shapes.forEach(function(shape){
-  shape.z -= .5;
-  if(shape.z < -9)shape.z += 200;
+  shape.z -= speed;
+  timer -= dt;
+  if(timer < 0){
+    timer = increment-colorSpeed;
+    shape.color++
+  }
+  if(shape.z < -7)shape.z += 300;
+  if(shape.z > 300)shape.z -= 306;
   let a = Math.random() * 0.07;
   shape.segs.forEach(function(seg){
     seg.a=matrix_rotate(seg.a,a,a,a);
@@ -202,6 +219,8 @@ function draw(dt){
     clear(31);
     vars.shapes.forEach(function(shape){
 
+
+
       shape.segs.forEach(function(seg){
         x=shape.x+seg.a.x;
         y=shape.y+seg.a.y;
@@ -213,7 +232,7 @@ function draw(dt){
             z=shape.z+seg.b.z;
             point2=project3D(x,y,z,vars);
             if(point2.d != -1){
-                line(point1.x, point1.y, point2.x, point2.y, shape.color);
+                line(point1.x, point1.y, point2.x, point2.y, colorRamp[shape.color%colorRamp.length]);
             }
         }
       })//end segments

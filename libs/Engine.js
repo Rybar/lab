@@ -128,10 +128,11 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
   }
 
   function pset(x, y, color) { //an index from colors[], 0-63
-    x = x.clamp(1, WIDTH)|0;
-    y = y.clamp(1,HEIGHT)|0;
+    x = x|0;
+    y = y|0;
     color = color|0;
-
+    if(x < 0 | x > WIDTH) return;
+    if(y < 0 | y > HEIGHT) return;
     ram[renderTarget + y * WIDTH + x] = color;
   }
 
@@ -547,24 +548,24 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
 }
 
   function imageToRam(image, address) {
-  		  
-         //var image = E.smallcanvas.toDataURL("image/png");	
+
+         //var image = E.smallcanvas.toDataURL("image/png");
           let tempCanvas = document.createElement('canvas');
          tempCanvas.width = WIDTH;
          tempCanvas.height = HEIGHT;
          let context = tempCanvas.getContext('2d');
          //draw image to canvas
          context.drawImage(image, 0, 0);
- 
+
          //get image data
          var imageData = context.getImageData(0,0, 256, 256);
- 
+
          //set up 32bit view of buffer
          let data = new Uint32Array(imageData.data.buffer);
- 
+
          //compare buffer to palette (loop)
          for(var i = 0; i < data.length; i++) {
- 
+
              ram[address + i] = colors.indexOf(data[i]);
          }
   }
