@@ -6,6 +6,8 @@
 - tunnels
 - 3d bobs/balls
 - spinny cube
+- lightning!
+-
 
 ### gamey things
 
@@ -15,7 +17,7 @@
 - WFC algorithm
 - auto-tile
 - dynamic lighting
-- 
+- colored lighting
 
 
 ### engine features
@@ -29,10 +31,9 @@
 - backface culling
 - dithering
 - read in image to color indexed buffer, -sprites, etc.
+- light/dark look-up table
 
 ### music / synth
 
 - two osc synth compatible with synth patch book
 - mouse-friendly music editor
-
-
