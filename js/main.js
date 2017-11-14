@@ -21,11 +21,9 @@
 
     $.getJSON("index.json", function(data) {
         // eventually I'll need to figure out how best to display multiple years.
-        Calendar.create(data, 2017, document.getElementById("calendarHolder"));
+        Calendar.create(data, 2017, 'November', document.getElementById("calendarHolder"));
         TagManager.addTags(data);
         $(".content").fadeIn(500);
     });
-    console.log('i ran');
-
 
 })();

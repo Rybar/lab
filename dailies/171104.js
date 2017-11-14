@@ -5,8 +5,8 @@ function init(){
     last = 0;
 
     panel
-    .addRange("numbers X", 0, 200, 0, 1)
-    .addRange("numbers Y", 0, 200, 0, 1)
+    .addRange("numbers X", 0, 200, 10, 1)
+    .addRange("numbers Y", 0, 200, 10, 1)
     .addRange("spacing X", 16, 50, 16, 1)
     .addRange("spacing Y", 16, 50, 16, 1)
     .addRange("box X", 25, 400, WIDTH/2, 1)

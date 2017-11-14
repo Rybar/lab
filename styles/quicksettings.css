@@ -2,8 +2,8 @@
   background-color: #000000;
   text-align: left;
   position: absolute;
-  width: 170px;
-  font-family: 'VT323', monospace;
+  width: 200px;
+  font-family: 'AdvoCut', monospace;
   font-size: 16px;
   box-shadow: none;
   user-select: none;
@@ -140,7 +140,7 @@
   color: #bbbbbb;
   height: 20px;
   border: 1px solid #666666;
-  font-family: 'VT323', monospace;
+  font-family: 'AdvoCut', monospace;
   font-size: 12px;
 }
 .qs_button:active {
@@ -179,7 +179,7 @@
   user-select: none;
   -webkit-user-select: none;
   cursor: default;
-  font-family: 'VT323', monospace;
+  font-family: 'AdvoCut', monospace;
   font-size: 16px;
 }
 .qs_text_input {
@@ -192,7 +192,7 @@
   border: none;
   background-color: #333333;
   color: #bbbbbb;
-  font-family: 'VT323', monospace;
+  font-family: 'AdvoCut', monospace;
   font-size: 16px;
 }
 .qs_text_input:focus {
@@ -214,7 +214,7 @@
   border-radius: 0;
   padding: 0 5px;
   -moz-outline: none;
-  font-family: 'VT323', monospace;
+  font-family: 'AdvoCut', monospace;
   font-size: 16px;
 }
 .qs_select option {
@@ -286,7 +286,7 @@
   color: #bbbbbb;
   height: 20px;
   border: 1px solid #666666;
-  font-family: 'VT323', monospace;
+  font-family: 'AdvoCut', monospace;
   font-size: 16px;
   width: 100%;
   display: block;

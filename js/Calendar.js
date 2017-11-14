@@ -20,7 +20,7 @@ var Calendar = {
     months: ["January", "February", "March", "April", "May", "June",
              "July", "August", "September", "October", "November", "December"],
 
-    create: function(model, year, parent) {
+    create: function(model, year, startMonth, parent) {
         this.model = model;
         this.container = ElementBuilder.createElement(parent, "div", "calendar");
         ElementBuilder.createElement(this.container, "div", "calendarHeader", year);

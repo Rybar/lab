@@ -131,8 +131,8 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
     x = x|0;
     y = y|0;
     color = color|0;
-    if(x < 0 | x > WIDTH) return;
-    if(y < 0 | y > HEIGHT) return;
+    if(x < 1 | x > WIDTH-1) return;
+    if(y < 1 | y > HEIGHT-1) return;
     ram[renderTarget + y * WIDTH + x] = color;
   }
 
@@ -333,8 +333,7 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
     if ( dy12 > 0 || ( dy12 == 0 && dx12 > 0 ) ) c1 ++;
     if ( dy23 > 0 || ( dy23 == 0 && dx23 > 0 ) ) c2 ++;
     if ( dy31 > 0 || ( dy31 == 0 && dx31 > 0 ) ) c3 ++;
-    // Note this doesn't kill subpixel precision, but only because we test for >=0 (not >0).
-    // It's a bit subtle. :)
+
     c1 = (c1 - 1) >> 4;
     c2 = (c2 - 1) >> 4;
     c3 = (c3 - 1) >> 4;

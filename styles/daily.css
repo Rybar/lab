@@ -1,3 +1,23 @@
+@font-face {
+  font-family: '04b08';
+    src:  url('../font/04b08.ttf.woff') format('woff'),
+    url('../font/04b08.ttf.svg#04b08') format('svg'),
+    url('../font/04b08.ttf.eot'),
+    url('../font/04b08.eot?#iefix') format('embedded-opentype');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: 'AdvoCut';
+    src:url('../font/AdvoCut.ttf.woff') format('woff'),
+        url('../font/AdvoCut.ttf.svg#AdvoCut') format('svg'),
+        url('../font/AdvoCut.ttf.eot'),
+        url('../font/AdvoCut.ttf.eot?#iefix') format('embedded-opentype');
+        font-weight: normal;
+        font-style: normal;
+}
+
 html, body {
     margin: 0;
     padding: 0;
@@ -13,8 +33,8 @@ canvas {
   left: 50%;
   right: 0;
 
-  width: 75vmax;
-  height: 47vmax;
+  width: 856px;
+  height: 512px;
 
   transform:translate(-50%, -25%);
   image-rendering: optimizeSpeed;
