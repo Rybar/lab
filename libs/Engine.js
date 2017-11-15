@@ -433,7 +433,7 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
               ram[ (renderTarget + ((y+i)*WIDTH+x+j)) ] = pal[ ram[(renderSource + ((sy+i)*WIDTH+sx+j))] ];
 
             }
-
+            
           }
         }
       }
