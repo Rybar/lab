@@ -109,7 +109,7 @@ ul {
   margin-left:-10px;
   margin-right: -10px;
   padding: 10px 10px 2px 10px;
-  background: -webkit-linear-gradient(45deg, red, blue);
+  background: -webkit-linear-gradient(270deg, red, red 20%, orange 20%, orange 40%, yellow 40%, yellow 60%, green 60%, green 80%, blue 80%, blue 100%);
   color: 'black';
   height: 60px;
   width: 100%;
