@@ -156,6 +156,8 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
 
   function lineTo(x,y){
     line(cursorX, cursorY, x, y, cursorColor);
+    cursorX = x;
+    cursorY = y;
   }
 
   function line(x1, y1, x2, y2, color) {
