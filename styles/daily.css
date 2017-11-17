@@ -35,7 +35,7 @@ canvas {
 
     margin: auto;
 
-  width: 856px;
+  width: 858px;
   height: 512px;
 
   /*//transform:translate(-50%, -25%);*/
@@ -50,8 +50,8 @@ canvas {
 }
 
 :-webkit-full-screen  {
-  width: 1281px;
-  height: 768px;
+  width: 2140px;
+  height: 1280px;
 }
 
 a, a:link, a:visited, a:active, a:hover {
