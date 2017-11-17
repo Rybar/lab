@@ -1,6 +1,6 @@
 //--------------Engine.js-------------------
 
-const WIDTH =     427;
+const WIDTH =     428;
 const HEIGHT =    256;
 const PAGES =     10;  //page = 1 screen HEIGHTxWIDTH worth of screenbuffer.
 const PAGESIZE = WIDTH*HEIGHT;
@@ -8,6 +8,15 @@ const PAGESIZE = WIDTH*HEIGHT;
 const SCREEN = 0;
 const BUFFER = PAGESIZE;
 const SPRITES = PAGESIZE*4;
+
+//Cantelope's dweet/codegolf shorthands, I'm using C already. ;)
+SIN=Math.sin;
+COS=Math.cos;
+
+//relative drawing position and pencolor, for drawing functions that require it.
+cursorX = 0;
+cursorY = 0;
+cursorColor = 22;
 
 fontString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_!@#.'\"?/<()";
 
@@ -138,6 +147,15 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
 
   function pget(x, y, page=renderTarget){
     return ram[page + x + y * WIDTH];
+  }
+
+  function moveTo(x,y){
+    cursorX = x;
+    cursorY = y;
+  }
+
+  function lineTo(x,y){
+    line(cursorX, cursorY, x, y, cursorColor);
   }
 
   function line(x1, y1, x2, y2, color) {
@@ -433,7 +451,7 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
               ram[ (renderTarget + ((y+i)*WIDTH+x+j)) ] = pal[ ram[(renderSource + ((sy+i)*WIDTH+sx+j))] ];
 
             }
-            
+
           }
         }
       }

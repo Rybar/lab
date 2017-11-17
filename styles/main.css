@@ -111,7 +111,7 @@ ul {
   padding: 10px 10px 2px 10px;
   background: -webkit-linear-gradient(270deg, red, red 20%, orange 20%, orange 40%, yellow 40%, yellow 60%, green 60%, green 80%, blue 80%, blue 100%);
   color: 'black';
-  height: 60px;
+  height: 10px;
   width: 100%;
   display: block;
   overflow: hidden;
