@@ -60,7 +60,8 @@ function draw(dt){
     		//x.beginPath()
 
     		// q is the depth (Z) value and is also used to generate curvature of the tunnel
-    		q=m-t*6%1
+    		q=m-t/200*6%1
+    		//console.log(q);
 
     		// O & P are the horizontal (X) curvature of the tunnel.
     		// they are the same except for P has (q+1), which is needed to plot
