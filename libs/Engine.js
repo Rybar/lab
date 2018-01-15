@@ -131,7 +131,7 @@ colors =
 pal =            [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,
                   32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63];
 
-pat = 0b1111000011110000
+pat = 0b1111111111111111
 //paldrk =          [0,0,1,2,3,4,5,6,6,10,11,12,13,14,2,2,15,16,17,18,22,20,23,24,25,26,2,2,27,28,31,13]
 
 ctx.imageSmoothingEnabled = false;
@@ -159,8 +159,11 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
     let px = (y % 4) * 4 + (x% 4);
     let mask = pat & Math.pow(2, px);
     color = color|0;
+    pcolor = mask ? color : color2;
+    if(pcolor == 0)return;
     if(x < 0 | x > WIDTH-1) return;
     if(y < 0 | y > HEIGHT-1) return;
+    
     ram[renderTarget + y * WIDTH + x] = mask ? color : color2;
   }
 
