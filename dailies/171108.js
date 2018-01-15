@@ -24,8 +24,6 @@ function init() {
       cRect((Math.random()*WIDTH)|0, (Math.random()*HEIGHT)|0, 10+(Math.random()*30)|0, 5+(Math.random()*10)|0, 3, 30)
     }
     renderTarget = 0;
-    C.webkitRequestFullscreen();
-
     for(let i = 0; i < 500; i++){
       points.push({
         x: Math.random()*WIDTH,

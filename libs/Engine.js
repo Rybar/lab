@@ -1,22 +1,36 @@
 //--------------Engine.js-------------------
 
-const WIDTH =     428;
-const HEIGHT =    256;
+const WIDTH =     320;
+const HEIGHT =    180;
 const PAGES =     10;  //page = 1 screen HEIGHTxWIDTH worth of screenbuffer.
 const PAGESIZE = WIDTH*HEIGHT;
 
 const SCREEN = 0;
 const BUFFER = PAGESIZE;
-const SPRITES = PAGESIZE*4;
+const BUFFER2 = PAGESIZE*2;
+const BACKGROUND = PAGESIZE*3;
+const MIDGROUND = PAGESIZE*4;
+const FOREGROUND = PAGESIZE*5;
+const COLLISION = PAGESIZE*6;
+const SPRITES = PAGESIZE*7;
+const UI = PAGESIZE*8;
 
-//Cantelope's dweet/codegolf shorthands, I'm using C already. ;)
-SIN=Math.sin;
-COS=Math.cos;
+//Cantelope's dweet/codegolf shorthands
+S=Math.sin;
+C=Math.cos;
+
+audioCtx = new AudioContext;
+audioMaster = audioCtx.createGain();
+audioMaster.connect(audioCtx.destination);
 
 //relative drawing position and pencolor, for drawing functions that require it.
+
+viewX = 0;
+viewY = 0;
 cursorX = 0;
 cursorY = 0;
 cursorColor = 22;
+cursorColor2 = 0;
 
 fontString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_!@#.'\"?/<()";
 
@@ -34,8 +48,8 @@ palDefault = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,2
                     32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63];
 
 var
-C =               document.getElementById('canvas'),
-ctx =             C.getContext('2d'),
+c =               document.getElementById('canvas'),
+ctx =             c.getContext('2d'),
 renderTarget =    0x00000,
 renderSource =    PAGESIZE, //buffer is ahead one screen's worth of pixels
 
@@ -117,13 +131,14 @@ colors =
 pal =            [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,
                   32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63];
 
+pat = 0b1111000011110000
 //paldrk =          [0,0,1,2,3,4,5,6,6,10,11,12,13,14,2,2,15,16,17,18,22,20,23,24,25,26,2,2,27,28,31,13]
 
 ctx.imageSmoothingEnabled = false;
-ctx.mozImageSmoothingEnabled = false;
+//ctx.mozImageSmoothingEnabled = false;
 
-C.width = WIDTH;
-C.height = HEIGHT;
+c.width = WIDTH;
+c.height = HEIGHT;
 var imageData =   ctx.getImageData(0, 0, WIDTH, HEIGHT),
 buf =             new ArrayBuffer(imageData.data.length),
 buf8 =            new Uint8Array(buf),
@@ -132,20 +147,24 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
 
 //--------------graphics functions----------------
 
-  function clear(color){
+  function clear(color = 0){
     ram.fill(color, renderTarget, renderTarget + PAGESIZE);
   }
 
-  function pset(x, y, color) { //an index from colors[], 0-63
+  function pset(x=cursorX, y=cursorY, color=cursorColor, color2 = cursorColor2) { //an index from colors[], 0-63
+    cursorColor2 = color2;
+    cursorColor = color;
     x = x|0;
     y = y|0;
+    let px = (y % 4) * 4 + (x% 4);
+    let mask = pat & Math.pow(2, px);
     color = color|0;
-    if(x < 1 | x > WIDTH-1) return;
-    if(y < 1 | y > HEIGHT-1) return;
-    ram[renderTarget + y * WIDTH + x] = color;
+    if(x < 0 | x > WIDTH-1) return;
+    if(y < 0 | y > HEIGHT-1) return;
+    ram[renderTarget + y * WIDTH + x] = mask ? color : color2;
   }
 
-  function pget(x, y, page=renderTarget){
+  function pget(x=cursorX, y=cursorY, page=renderTarget){
     return ram[page + x + y * WIDTH];
   }
 
@@ -154,13 +173,51 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
     cursorY = y;
   }
 
-  function lineTo(x,y){
-    line(cursorX, cursorY, x, y, cursorColor);
+  function lineTo(x,y, color=cursorColor, color2 = cursorColor2){
+    cursorColor2 = color2;
+    cursorColor = color;
+    line(cursorX, cursorY, x, y, color, color2);
     cursorX = x;
     cursorY = y;
   }
 
-  function line(x1, y1, x2, y2, color) {
+  function bezier(x0, y0, x1, y1, x2, y2, color=cursorColor, color2 = cursorColor2){
+    cursorColor2 = color2;
+    cursorColor = color;
+    var sx = x2-x1, sy = y2-y1;
+    var xx = x0-x1, yy = y0-y1, xy;         /* relative values for checks */
+    var dx, dy, err, cur = xx*sy-yy*sx;                    /* curvature */
+
+    //console.assert(xx*sx <= 0 && yy*sy <= 0, 'sign changed!');  /* sign of gradient must not change */
+
+    if (sx*sx+sy*sy > xx*xx+yy*yy) { /* begin with longer part */
+      x2 = x0; x0 = sx+x1; y2 = y0; y0 = sy+y1; cur = -cur;  /* swap P0 P2 */
+    }
+    if (cur != 0) {                                    /* no straight line */
+      xx += sx; xx *= sx = x0 < x2 ? 1 : -1;           /* x step direction */
+      yy += sy; yy *= sy = y0 < y2 ? 1 : -1;           /* y step direction */
+      xy = 2*xx*yy; xx *= xx; yy *= yy;          /* differences 2nd degree */
+      if (cur*sx*sy < 0) {                           /* negated curvature? */
+        xx = -xx; yy = -yy; xy = -xy; cur = -cur;
+      }
+      dx = 4.0*sy*cur*(x1-x0)+xx-xy;             /* differences 1st degree */
+      dy = 4.0*sx*cur*(y0-y1)+yy-xy;
+      xx += xx; yy += yy; err = dx+dy+xy;                /* error 1st step */
+      do {
+        pset(x0,y0, color);                                     /* plot curve */
+        if (x0 == x2 && y0 == y2) return;  /* last pixel -> curve finished */
+        y1 = 2*err < dx;                  /* save value for test of y step */
+        if (2*err > dy) { x0 += sx; dx -= xy; err += dy += yy; } /* x step */
+        if (    y1    ) { y0 += sy; dy -= xy; err += dx += xx; } /* y step */
+      } while (dy < dx );           /* gradient negates -> algorithm fails */
+    }
+    line(x0,y0, x2,y2, color);                  /* plot remaining part to end */
+  }
+
+
+  function line(x1, y1, x2, y2, color=cursorColor, color2 = cursorColor2) {
+    cursorColor2 = color2;
+    cursorColor = color;
 
     x1 = x1|0;
     x2 = x2|0;
@@ -214,7 +271,13 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
 
   }
 
-  function circle(xm, ym, r, color) {
+  function circle(xm=cursorX, ym=cursorY, r=5, color=cursorColor, color2 = cursorColor2) {
+    cursorColor2 = color2;
+    cursorColor = color;
+    xm = xm|0;
+    ym = ym|0;
+    r = r|0;
+    color = color|0;
     var x = -r, y = 0, err = 2 - 2 * r;
     /* II. Quadrant */
     do {
@@ -235,7 +298,14 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
     } while (x < 0);
   }
 
-  function fillCircle(xm, ym, r, color) {
+  function fillCircle(xm, ym, r=5, color=cursorColor, color2 = cursorColor2) {
+    cursorColor2 = color2;
+    cursorColor = color;
+    xm = xm|0;
+    ym = ym|0;
+    r = r|0;
+    color = color|0;
+
     if(r < 0) return;
     xm = xm|0; ym = ym|0, r = r|0; color = color|0;
     var x = -r, y = 0, err = 2 - 2 * r;
@@ -249,7 +319,44 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
     } while (x < 0);
   }
 
-  function rect(x, y, w, h, color) {
+  function ellipse(x0=cursorX, y0=cursorY, width, height, color=cursorColor, color2 = cursorColor2){
+    cursorColor2 = color2;
+    cursorColor = color;
+    x0 = x0|0;
+    let x1 = x0+width|0;
+    y0 = y0|0;
+    let y1 = y0+height|0;
+     let a = Math.abs(x1-x0), b = Math.abs(y1-y0), b1 = b&1; /* values of diameter */
+     let dx = 4*(1-a)*b*b, dy = 4*(b1+1)*a*a; /* error increment */
+     let err = dx+dy+b1*a*a, e2; /* error of 1.step */
+
+     if (x0 > x1) { x0 = x1; x1 += a; } /* if called with swapped points */
+     if (y0 > y1) y0 = y1; /* .. exchange them */
+     y0 += (b+1)/2; y1 = y0-b1;   /* starting pixel */
+     a *= 8*a; b1 = 8*b*b;
+
+     do {
+         pset(x1, y0, color); /*   I. Quadrant */
+         pset(x0, y0, color); /*  II. Quadrant */
+         pset(x0, y1, color); /* III. Quadrant */
+         pset(x1, y1, color); /*  IV. Quadrant */
+         e2 = 2*err;
+         if (e2 <= dy) { y0++; y1--; err += dy += a; }  /* y step */
+         if (e2 >= dx || 2*err > dy) { x0++; x1--; err += dx += b1; } /* x step */
+     } while (x0 <= x1);
+
+     while (y0-y1 < b) {  /* too early stop of flat ellipses a=1 */
+         pset(x0-1, y0, color); /* -> finish tip of ellipse */
+         pset(x1+1, y0++, color);
+         pset(x0-1, y1, color);
+         pset(x1+1, y1--, color);
+     }
+  }
+
+
+  function rect(x, y, w=16, h=16, color=cursorColor, color2 = cursorColor2) {
+    cursorColor2 = color2;
+    cursorColor = color;
     x1 = x|0;
     y1 = y|0;
     x2 = (x+w)|0;
@@ -262,11 +369,14 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
     line(x1, y1, x1, y2, color);
   }
 
-  function fillRect(x, y, w, h, color) {
+  function fillRect(x, y, w=16, h=16, color=cursorColor, color2 = cursorColor2) {
+    cursorColor2 = color2;
+    cursorColor = color;
     x1 = x|0;
     y1 = y|0;
     x2 = (x+w)|0;
     y2 = (y+h)|0;
+    color = color|0;
 
     var i = Math.abs(y2 - y1);
     line(x1, y1, x2, y1, color);
@@ -280,14 +390,21 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
     line(x1,y2, x2, y2, color);
   }
 
-  function cRect(x,y,w,h,c,color){
+  function cRect(x,y,w,h,c,color=cursorColor, color2 = cursorColor2){
+    x = x|0;
+    y = y|0;
+    w = w|0;
+    h = h|0;
+    c = c|0;
+    color = color|0;
     for(let i = 0; i <= c; i++){
       fillRect(x+i,y-i,w-i*2,h+i*2,color);
     }
   }
 
-  function outline(renderSource, renderTarget, color, color2=color, color3=color, color4=color){
-
+  function outline(renderSource, renderTarget, color=cursorColor, color2=cursorColor2, color3=color, color4=color){
+    cursorColor2 = color2;
+    cursorColor = color;
     for(let i = 0; i <= WIDTH; i++ ){
       for(let j = 0; j <= HEIGHT; j++){
         let left = i-1 + j * WIDTH;
@@ -314,14 +431,19 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
     }
   }
 
-  function triangle(x1, y1, x2, y2, x3, y3, color) {
+  function triangle(x1, y1, x2, y2, x3, y3, color=cursorColor, color2 = cursorColor2) {
+    cursorColor2 = color2;
+    cursorColor = color;
     line(x1,y1, x2,y2, color);
     line(x2,y2, x3,y3, color);
     line(x3,y3, x1,y1, color);
   }
 
-  function fillTriangle( x1, y1, x2, y2, x3, y3, color ) {
-
+  function fillTriangle( x1, y1, x2, y2, x3, y3, color=cursorColor , color2 = cursorColor2) {
+    cursorColor2 = color2;
+    cursorColor = color;
+    //I don't pretend to know how this works exactly; I know it uses barycentric coordinates.
+    //Might replace with simpler line-sweep; haven't perf tested yet.
     var canvasWidth = WIDTH;
     // http://devmaster.net/forums/topic/1145-advanced-rasterization/
     // 28.4 fixed-point coordinates
@@ -412,7 +534,14 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
     }
   }
 
-  function spr(sx = 0, sy = 0, sw = WIDTH, sh = HEIGHT, x=0, y=0, flipx = false, flipy = false){
+  function spr(sx = 0, sy = 0, sw = WIDTH, sh = HEIGHT, x=0, y=0, flipx = false, flipy = false, palette=pal){
+
+    sx = sx|0
+    sy = sy|0
+    sw = sw|0
+    sh = sh|0
+    x = x|0
+    y = y|0
 
     for(var i = 0; i < sh; i++){
 
@@ -423,7 +552,7 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
 
             if(ram[(renderSource + ( ( sy + (sh-i) )*WIDTH+sx+(sw-j)))] > 0) {
 
-              ram[ (renderTarget + ((y+i)*WIDTH+x+j)) ] = pal[ ram[(renderSource + ((sy+(sh-i))*WIDTH+sx+(sw-j)))] ];
+              ram[ (renderTarget + ((y+i)*WIDTH+x+j)) ] = palette[ ram[(renderSource + ((sy+(sh-i))*WIDTH+sx+(sw-j)))] ];
 
             }
 
@@ -432,7 +561,7 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
 
             if(ram[(renderSource + ( ( sy + (sh-i) )*WIDTH+sx+j))] > 0) {
 
-              ram[ (renderTarget + ((y+i)*WIDTH+x+j)) ] = ram[(renderSource + ((sy+(sh-i))*WIDTH+sx+j))];
+              ram[ (renderTarget + ((y+i)*WIDTH+x+j)) ] = palette[ ram[(renderSource + ((sy+(sh-i))*WIDTH+sx+j))] ];
 
             }
 
@@ -441,7 +570,7 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
 
             if(ram[(renderSource + ((sy+i)*WIDTH+sx+(sw-j)))] > 0) {
 
-              ram[ (renderTarget + ((y+i)*WIDTH+x+j)) ] = ram[(renderSource + ((sy+i)*WIDTH+sx+(sw-j)))];
+              ram[ (renderTarget + ((y+i)*WIDTH+x+j)) ] = palette[ ram[(renderSource + ((sy+i)*WIDTH+sx+(sw-j)))] ];
 
             }
 
@@ -450,7 +579,7 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
 
             if(ram[(renderSource + ((sy+i)*WIDTH+sx+j))] > 0) {
 
-              ram[ (renderTarget + ((y+i)*WIDTH+x+j)) ] = pal[ ram[(renderSource + ((sy+i)*WIDTH+sx+j))] ];
+              ram[ (renderTarget + ((y+i)*WIDTH+x+j)) ] = palette [ ram[(renderSource + ((sy+i)*WIDTH+sx+j))] ] ;
 
             }
 
@@ -460,7 +589,16 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
     }
   }
 
-  function sspr(sx = 0, sy = 0, sw = 16, sh = 16, x=0, y=0, dw=16, dh=16, flipx = false, flipy = false){
+  function sspr(sx = 0, sy = 0, sw = 16, sh = 16, x=0, y=0, dw=16, dh=16, palette=pal){
+
+    sx = sx|0
+    sy = sy|0
+    sw = sw|0
+    sh = sh|0
+    x = x|0
+    y = y|0
+    dw = dw|0
+    dh = dh|0
 
     var xratio = sw / dw;
     var yratio = sh / dh;
@@ -473,7 +611,7 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
 
         if(y+i < HEIGHT && x+j < WIDTH && y+i > -1 && x+j > -1) {
           if (ram[(renderSource + ((sy + py) * WIDTH + sx + px))] > 0) {
-            ram[(renderTarget + ((y + i) * WIDTH + x + j))] = ram[(renderSource + ((sy + py) * WIDTH + sx + px))]
+            ram[(renderTarget + ((y + i) * WIDTH + x + j))] = palette[ ram[(renderSource + ((sy + py) * WIDTH + sx + px))] ]
           }
         }
 
@@ -483,9 +621,9 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
 
   }
 
-  function rspr( sx, sy, sw, sh, destCenterX, destCenterY, scale, angle ){
+  function rspr( sx, sy, sw, sh, destCenterX, destCenterY, scale, angle, palette=pal ){
 
-    angle = angle * 0.0174533 //convert to radians in place
+    //angle = angle * 0.0174533 //convert to radians in place
     let sourceCenterX = (sw / 2)|0;
     let sourceCenterY = (sh / 2)|0;
 
@@ -515,20 +653,27 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
        let drawX = (x + destCenterX)|0;
         let drawY = (y + destCenterY)|0;
 
-       if(u >= 0 && v >= 0 && u < sw && v < sh){
+       //screen check. otherwise drawn pix will wrap to next line due to 1D nature of buffer array
+       if(drawX > 0 && drawX < WIDTH && drawY > 0 && drawY < HEIGHT){
+
+          if(u >= 0 && v >= 0 && u < sw && v < sh){
           if( ram[renderSource + (u+sx) + (v+sy) * WIDTH] > 0) {
-            ram[renderTarget + drawX + drawY * WIDTH] = ram[renderSource + (u+sx) + (v+sy) * WIDTH]
+            ram[renderTarget + drawX + drawY * WIDTH] = palette[ ram[renderSource + (u+sx) + (v+sy) * WIDTH] ]
           }
+
         }
+
+       }
+
 
      } //end x loop
 
    } //end outer y loop
   }
 
-  function checker(x, y, w, h, nRow, nCol, color) {
-    //var w = 256;
-    //var h = 256;
+  function checker(x, y, w, h, nRow, nCol, color=cursorColor, color2 = cursorColor2) {
+    cursorColor2 = color2;
+    cursorColor = color;
 
     nRow = nRow || 8;    // default number of rows
     nCol = nCol || 8;    // default number of columns
@@ -545,27 +690,6 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
     }
   }
 
-
-  function playSound(buffer, playbackRate = 1, pan = 0, loop = false) {
-
-    var source = audioCtx.createBufferSource();
-    var gainNode = audioCtx.createGain();
-    var panNode = audioCtx.createStereoPanner();
-
-    source.buffer = buffer;
-    source.connect(panNode);
-    panNode.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-
-    //gainNode.connect(audioCtx.destination);
-    source.playbackRate.value = playbackRate;
-    source.loop = loop;
-    gainNode.gain.value = 1;
-    panNode.pan.value = pan;
-    source.start();
-    return {volume: gainNode, sound: source};
-}
-
   function imageToRam(image, address) {
 
          //var image = E.smallcanvas.toDataURL("image/png");
@@ -577,7 +701,7 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
          context.drawImage(image, 0, 0);
 
          //get image data
-         var imageData = context.getImageData(0,0, 256, 256);
+         var imageData = context.getImageData(0,0, WIDTH, HEIGHT);
 
          //set up 32bit view of buffer
          let data = new Uint32Array(imageData.data.buffer);
@@ -608,6 +732,157 @@ function render() {
 
 }
 
+//-----------txt.js----------------
+//forked from Jack Rugile's text renderer in Radius Raid: https://github.com/jackrugile/radius-raid-js13k/blob/master/js/text.js
+
+//o is an array of options with the following structure:
+/*
+0: text
+1: x
+2: y
+3: hspacing
+4: vspacing
+5: halign
+6: valign
+7: scale
+8: color
+//options 9-11 are for animating the text per-character. just sin motion
+9: per character offset
+10: delay, higher is slower
+11: frequency
+*/
+function textLine(o) {
+
+ //o 9,10,11 are 6,7,8 here
+
+ if(!o[7])o[7]=1
+ if(!o[8])o[8]=1
+
+ var textLength = o[0].length,
+   size = 5;
+
+ for (var i = 0; i < textLength; i++) {
+
+   var letter = [];
+   letter = getCharacter( o[0].charAt(i) );
+
+   for (var y = 0; y < size; y++) {
+     for (var x = 0; x < size; x++) {
+       //if (letter[y][x] == 1) {
+       if (letter[y*size+x] == 1){
+         if(o[4] == 1){
+           pset(
+             o[1] + ( x * o[4] ) + ( ( size * o[4] ) + o[3] ) * i,
+             ( o[2] + ( o[6] ? Math.sin((t+i*o[8])*1/o[7])*o[6] : 0 ) + (y * o[4]) )|0,
+             o[5]
+           );
+         }
+
+         else {
+           fillRect(
+           o[1] + ( x * o[4] ) + ( ( size * o[4] ) + o[3] ) * i,
+           ( o[2] + ( o[6] ? Math.sin((t+i*o[8])*1/o[7])*o[6] : 0 ) + (y * o[4]) )|0,
+           o[4],
+           o[4],
+           o[5]);
+         }
+
+       } //end draw routine
+     }  //end x loop
+   }  //end y loop
+ }  //end text loop
+}  //end textLine()
+
+function text(o) {
+ var size = 5,
+ letterSize = size * o[7],
+ lines = o[0].split('\n'),
+ linesCopy = lines.slice(0),
+ lineCount = lines.length,
+ longestLine = linesCopy.sort(function (a, b) {
+   return b.length - a.length;
+ })[0],
+ textWidth = ( longestLine.length * letterSize ) + ( ( longestLine.length - 1 ) * o[3] ),
+ textHeight = ( lineCount * letterSize ) + ( ( lineCount - 1 ) * o[4] );
+
+ if(!o[5])o[5] = 'left';
+ if(!o[6])o[6] = 'bottom';
+
+ var sx = o[1],
+   sy = o[2],
+   ex = o[1] + textWidth,
+   ey = o[2] + textHeight;
+
+ if (o[5] == 'center') {
+   sx = o[1] - textWidth / 2;
+   ex = o[1] + textWidth / 2;
+ } else if (o[5] == 'right') {
+   sx = o[1] - textWidth;
+   ex = o[1];
+ }
+
+ if (o[6] == 'center') {
+   sy = o[2] - textHeight / 2;
+   ey = o[2] + textHeight / 2;
+ } else if (o[6] == 'bottom') {
+   sy = o[2] - textHeight;
+   ey = o[2];
+ }
+
+ var cx = sx + textWidth / 2,
+   cy = sy + textHeight / 2;
+
+   for (var i = 0; i < lineCount; i++) {
+     var line = lines[i],
+       lineWidth = ( line.length * letterSize ) + ( ( line.length - 1 ) * o[3] ),
+       x = o[1],
+       y = o[2] + ( letterSize + o[4] ) * i;
+
+     if (o[5] == 'center') {
+       x = o[1] - lineWidth / 2;
+     } else if (o[5] == 'right') {
+       x = o[1] - lineWidth;
+     }
+
+     if (o[6] == 'center') {
+       y = y - textHeight / 2;
+     } else if (o[6] == 'bottom') {
+       y = y - textHeight;
+     }
+
+     textLine([
+       line,
+       x,
+       y,
+       o[3] || 0,
+       o[7] || 1,
+       o[8],
+       o[9],
+       o[10],
+       o[11]
+     ]);
+   }
+
+ return {
+   sx: sx,
+   sy: sy,
+   cx: cx,
+   cy: cy,
+   ex: ex,
+   ey: ey,
+   width: textWidth,
+   height: textHeight
+ }
+}
+
+function getCharacter(char){
+ index = fontString.indexOf(char);
+ return fontBitmap.substring(index * 25, index*25+25).split('') ;
+}
+
+//-----------END txt.js----------------
+
+
 
 
 Number.prototype.clamp = function(min, max) {
@@ -616,6 +891,179 @@ Number.prototype.clamp = function(min, max) {
 
 Number.prototype.map = function(old_bottom, old_top, new_bottom, new_top) {
   return (this - old_bottom) / (old_top - old_bottom) * (new_top - new_bottom) + new_bottom;
+};
+
+Number.prototype.pad = function(size, char="0") {
+  var s = String(this);
+  while (s.length < (size || 2)) {s = char + s;}
+  return s;
+};
+//---audio handling-----------------
+function BufferLoader(context, urlList, callback) {
+  this.context = context;
+  this.urlList = urlList;
+  this.onload = callback;
+  this.bufferList = new Array();
+  this.loadCount = 0;
 }
+
+BufferLoader.prototype.loadBuffer = function(url, index) {
+  // Load buffer asynchronously
+  var request = new XMLHttpRequest();
+  request.open("GET", url, true);
+  request.responseType = "arraybuffer";
+
+  var loader = this;
+
+  request.onload = function() {
+    // Asynchronously decode the audio file data in request.response
+    loader.context.decodeAudioData(
+      request.response,
+      function(buffer) {
+        if (!buffer) {
+          alert('error decoding file data: ' + url);
+          return;
+        }
+        loader.bufferList[index] = buffer;
+        if (++loader.loadCount == loader.urlList.length)
+          loader.onload(loader.bufferList);
+      },
+      function(error) {
+        console.error('decodeAudioData error', error);
+      }
+    );
+  }
+
+  request.onerror = function() {
+    alert('BufferLoader: XHR error');
+  }
+
+  request.send();
+}
+
+BufferLoader.prototype.load = function() {
+  for (var i = 0; i < this.urlList.length; ++i)
+  this.loadBuffer(this.urlList[i], i);
+}
+
+function playSound(buffer, playbackRate = 1, pan = 0, volume = .5, loop = false) {
+
+  var source = audioCtx.createBufferSource();
+  var gainNode = audioCtx.createGain();
+  var panNode = audioCtx.createStereoPanner();
+
+  source.buffer = buffer;
+  source.connect(panNode);
+  panNode.connect(gainNode);
+  gainNode.connect(audioMaster);
+
+  source.playbackRate.value = playbackRate;
+  source.loop = loop;
+  gainNode.gain.value = volume;
+  panNode.pan.value = pan;
+  source.start();
+  return {volume: gainNode, sound: source};
+}
+
+//--------keyboard input--------------
+Key = {
+
+    _pressed: {},
+    _released: {},
+
+    LEFT: 37,
+    UP: 38,
+    RIGHT: 39,
+    DOWN: 40,
+    SPACE: 32,
+    ONE: 49,
+    TWO: 50,
+    THREE: 51,
+    FOUR: 52,
+    a: 65,
+    c: 67,
+    w: 87,
+    s: 83,
+    d: 68,
+    z: 90,
+    x: 88,
+    f: 70,
+    p: 80,
+    r: 82,
+
+    isDown(keyCode) {
+        return this._pressed[keyCode];
+    },
+
+    justReleased(keyCode) {
+        return this._released[keyCode];
+    },
+
+    onKeydown(event) {
+        this._pressed[event.keyCode] = true;
+    },
+
+    onKeyup(event) {
+        this._released[event.keyCode] = true;
+        delete this._pressed[event.keyCode];
+
+    },
+
+    update() {
+        this._released = {};
+    }
+};
+
+function LCG(seed = Date.now(), a = 1664525, c = 1013904223, m = Math.pow(2,32) ){
+  this.seed = seed;
+  this.a= a;
+  this.c = c;
+  this.m = m;
+}
+
+
+  LCG.prototype.setSeed =  function(seed) {
+    this.seed = seed;
+  },
+
+  LCG.prototype.nextInt = function() {
+    // range [0, 2^32)
+    this.seed = (this.seed * this.a + this.c) % this.m;
+    return this.seed;
+  },
+
+  LCG.prototype.nextFloat = function() {
+    // range [0, 1)
+    return this.nextInt() / this.m;
+  },
+
+  LCG.prototype.nextBool = function(percent) {
+    // percent is chance of getting true
+    if(percent == null) {
+      percent = 0.5;
+    }
+    return this.nextFloat() < percent;
+  },
+
+  LCG.prototype.nextFloatRange = function(min, max) {
+    // range [min, max)
+    return min + this.nextFloat() * (max - min);
+  },
+
+  LCG.prototype.nextIntRange = function(min, max) {
+    // range [min, max)
+    return Math.floor(this.nextFloatRange(min, max));
+  },
+
+  LCG.prototype.nextColor = function() {
+    // range [#000000, #ffffff]
+    var c = this.nextIntRange(0, Math.pow(2, 24)).toString(16).toUpperCase();
+    while(c.length < 6) {
+      c = "0" + c;
+    }
+    return "#" + c;
+  }
+
+
 
 //--------END Engine.js-------------------
