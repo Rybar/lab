@@ -8,7 +8,7 @@ function init() {
     .addRange("box X", 25, 400, 90, 1)
     .addRange("box Y", 25, 200, HEIGHT/2, 1);
     
-    patterns = [
+    dither = [
         0b1111111111111111,
         0b1111111111110111,
         0b1111110111110111,
@@ -26,8 +26,6 @@ function init() {
         0b1000000000100000,
         0b1000000000000000,
         0b0000000000000000,
-
-        
         ]
 
     loop();
@@ -58,14 +56,14 @@ function step(dt){
 function draw(dt){
     clear(30);
      for(var i = 0; i < 15; i++){
-        pat = patterns[i];
+        pat = dither[i];
         fillRect(0,8*i,WIDTH,8,29,30)
     }
    
     boxX = panel.getValue("box X");
     boxY = panel.getValue("box Y");
     fillCircle(boxX,boxY, boxW, 12,12);
-     pat = dt%2 == 0 ? 0b1010010110100101 : 0b0101101001011010
+     pat = dt%2 == 0 ? dither[7] : ~dither[7]&( (1 << 16)-1 );
     fillRect(40,40,60,60, 5,0);
     
    
