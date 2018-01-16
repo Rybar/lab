@@ -9,7 +9,7 @@ mv dev/$TODAY.png thumbs/
 
 
 
-open index.json
+#open index.json
 #vim dailies/$TODAY.html
 #vim dailies/$YESTERDAY.html
 #http-server & google-chrome http://localhost:8080
