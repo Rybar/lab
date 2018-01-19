@@ -11,6 +11,9 @@ function init() {
     .addRange("pattern", 0, 65535, 42405, 1)
     .addRange("foreground color", 0,63, 12, 1)
     .addRange("background color", 0,63, 0, 1)
+    .addRange("scale", 1, 8, 1, 1)
+    .addBoolean("0", 0)
+    .addBoolean("1", 0)
 
     loop();
 }
@@ -18,7 +21,7 @@ function init() {
 function loop(dt){
 
     pal = palDefault;
-    
+
     t += dt;
 
     step(dt);
@@ -30,18 +33,24 @@ function loop(dt){
 }
 
 function step(dt){
-    boxW = 50 + Math.sin(t/20)*30;
 
 }
 
 function draw(dt){
 
-    clear(30);
-
+    clear(0);
     pat = panel.getValue("pattern");
     fore = panel.getValue("foreground color");
     back = panel.getValue("background color");
+    scale = panel.getValue("scale");
+    renderTarget = BUFFER;
+    clear(0);
     fillRect(0,0,WIDTH,HEIGHT, fore,back);
+    renderSource = BUFFER;
+    renderTarget = SCREEN;
+    sspr(0,0, WIDTH/scale, HEIGHT/scale, 0,0, WIDTH, HEIGHT);
+    pat = dither[0];
+    rect(64,0,4*scale,4*scale,21);
 }
 
 init();

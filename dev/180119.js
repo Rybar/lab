@@ -12,6 +12,8 @@ function init() {
     .addRange("foreground color", 0,63, 12, 1)
     .addRange("background color", 0,63, 0, 1)
     .addRange("scale", 1, 8, 1, 1)
+    .addBoolean("0", 0)
+    .addBoolean("1", 0)
 
     loop();
 }
