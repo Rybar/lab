@@ -2,32 +2,37 @@
   "171104": {
     "tags": "helloWorld"
     },
-    
+
     "171105": {
     "tags": "colorful, rain, circles"
     },
-    
+
     "171106": {
     "tags": "3D, cubes, colorful"
     },
-    
+
     "171107": {
     "tags": "3D, cubes, colorful, tunnel"
     },
-    
+
     "171108": {
     "tags": "particles, palette-shift, color-indexing"
     },
-    
+
     "171117": {
     "tags": "tunnel, 3D"
     },
-    
+
     "180116": {
     "tags": "transparency, dither, patterns"
     },
-    
+
     "180118": {
     "tags": "dither, patterns, explorer"
+    },
+
+    "180119": {
+    "tags": "dither, patterns, explorer, mirror"
     }
+
 }

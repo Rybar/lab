@@ -62,9 +62,9 @@ fontBitmap = "111111000111111100011000111110100011111010001111101111110000100001
         0b1000000000000000,
         0b0000000000000000,
         ];
-        
+
 pat = 0b1111111111111111;
-        
+
 //default palette index
 palDefault = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,
                     32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63];
@@ -185,7 +185,7 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
     if(pcolor == 0)return;
     if(x < 0 | x > WIDTH-1) return;
     if(y < 0 | y > HEIGHT-1) return;
-    
+
     ram[renderTarget + y * WIDTH + x] = mask ? color : color2;
   }
 
@@ -575,34 +575,34 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
         if(y+i < HEIGHT && x+j < WIDTH && y+i > -1 && x+j > -1){
           if(flipx & flipy){
 
-            if(ram[(renderSource + ( ( sy + (sh-i) )*WIDTH+sx+(sw-j)))] > 0) {
+            if(ram[(renderSource + ( ( sy + (sh-i) )*WIDTH+sx+(sw-j)))] >= 0) {
 
-              ram[ (renderTarget + ((y+i)*WIDTH+x+j)) ] = palette[ ram[(renderSource + ((sy+(sh-i))*WIDTH+sx+(sw-j)))] ];
+              ram[ (renderTarget + ((y+i)*WIDTH+x+j)) ] = palette[ ram[(renderSource + ((sy+(sh-i-1))*WIDTH+sx+(sw-j-1)))] ];
 
             }
 
           }
           else if(flipy && !flipx){
 
-            if(ram[(renderSource + ( ( sy + (sh-i) )*WIDTH+sx+j))] > 0) {
+            if(ram[(renderSource + ( ( sy + (sh-i) )*WIDTH+sx+j))] >= 0) {
 
-              ram[ (renderTarget + ((y+i)*WIDTH+x+j)) ] = palette[ ram[(renderSource + ((sy+(sh-i))*WIDTH+sx+j))] ];
+              ram[ (renderTarget + ((y+i)*WIDTH+x+j)) ] = palette[ ram[(renderSource + ((sy+(sh-i-1))*WIDTH+sx+j))] ];
 
             }
 
           }
           else if(flipx && !flipy){
 
-            if(ram[(renderSource + ((sy+i)*WIDTH+sx+(sw-j)))] > 0) {
+            if(ram[(renderSource + ((sy+i)*WIDTH+sx+(sw-j-1)))] >= 0) {
 
-              ram[ (renderTarget + ((y+i)*WIDTH+x+j)) ] = palette[ ram[(renderSource + ((sy+i)*WIDTH+sx+(sw-j)))] ];
+              ram[ (renderTarget + ((y+i)*WIDTH+x+j)) ] = palette[ ram[(renderSource + ((sy+i)*WIDTH+sx+(sw-j-1)))] ];
 
             }
 
           }
           else if(!flipx && !flipy){
 
-            if(ram[(renderSource + ((sy+i)*WIDTH+sx+j))] > 0) {
+            if(ram[(renderSource + ((sy+i)*WIDTH+sx+j))] >= 0) {
 
               ram[ (renderTarget + ((y+i)*WIDTH+x+j)) ] = palette [ ram[(renderSource + ((sy+i)*WIDTH+sx+j))] ] ;
 
