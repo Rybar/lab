@@ -15,9 +15,18 @@ const COLLISION = PAGESIZE*6;
 const SPRITES = PAGESIZE*7;
 const UI = PAGESIZE*8;
 
-//Cantelope's dweet/codegolf shorthands
+
 S=Math.sin;
+
 C=Math.cos;
+
+function cos(x) { // x = 0 - 1
+  return Math.cos(x*6.28318531);
+};
+
+function sin(x) {
+  return Math.sin(-x*6.28318531);
+}
 
 audioCtx = new AudioContext;
 audioMaster = audioCtx.createGain();
@@ -379,13 +388,13 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
   }
 
 
-  function rect(x, y, w=16, h=16, color=cursorColor, color2 = cursorColor2) {
+  function rect(x, y, x2=16, y2=16, color=cursorColor, color2 = cursorColor2) {
     cursorColor2 = color2;
     cursorColor = color;
     x1 = x|0;
     y1 = y|0;
-    x2 = (x+w)|0;
-    y2 = (y+h)|0;
+    x2 = x2|0;
+    y2 = y2|0;
 
 
     line(x1,y1, x2, y1, color);
@@ -394,13 +403,13 @@ ram =             new Uint8Array(WIDTH * HEIGHT * PAGES);
     line(x1, y1, x1, y2, color);
   }
 
-  function fillRect(x, y, w=16, h=16, color=cursorColor, color2 = cursorColor2) {
+  function fillRect(x, y, x2=16, y2=16, color=cursorColor, color2 = cursorColor2) {
     cursorColor2 = color2;
     cursorColor = color;
     x1 = x|0;
     y1 = y|0;
-    x2 = (x+w)|0;
-    y2 = (y+h)|0;
+    x2 = x2|0;
+    y2 = y2|0;
     color = color|0;
 
     var i = Math.abs(y2 - y1);
